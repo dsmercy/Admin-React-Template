@@ -1,24 +1,24 @@
 import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form';
-import { createReactEditorJS } from "react-editor-js";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-import { EDITOR_JS_TOOLS } from "../common/constants";
 
 export default function AddProduct() {
-
-    const ReactEditorJS = createReactEditorJS();
 
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setValue ,
+        clearErrors,
+        setError
     } = useForm({
         mode: 'onChange',
     });
 
     useEffect(() => {
         console.log('errors', errors);
-        // console.log('register',register);
     }, [errors])
 
 
@@ -28,14 +28,16 @@ export default function AddProduct() {
             <form className="row g-3 needs-validation" onSubmit={handleSubmit((data) => console.log('data', data))}>
                 <div className="col-md-6 position-relative">
                     <label htmlFor="Name" className="form-label">Name</label>
-                    <input type="text" className="form-control" {...register('Name', { required: 'required msg' })} />
+                    <input type="text" className="form-control" {...register('Name', { required: 'required msg' })}  defaultValue="test data"/>
                     {errors.Name && <div className="text-danger">
                         This field is required
                     </div>}
                 </div>
                 <div className="col-md-6 position-relative">
                     <label htmlFor="Price" className="form-label">Price/kg</label>
-                    <input type="number" className="form-control" {...register('Price', {
+                    <input type="number" className="form-control"
+                    defaultValue="90"
+                    {...register('Price', {
                         validate: {
                             positiveNumber: (value) => parseFloat(value) > 0,
                             lessThanHundred: (value) => parseFloat(value) <= 100,
@@ -50,8 +52,19 @@ export default function AddProduct() {
                 </div>
                 <div className="col-md-6 position-relative">
                     <label htmlFor="Brand" className="form-label">Brand</label>
-                    <input type="text" className="form-control" {...register('Brand', { required: true })} />
+                    <input type="text" className="form-control" 
+                    defaultValue="test data"
+                    {...register('Brand', { required: true })} />
                     {errors.Brand && <div className="text-danger">
+                        This field is required
+                    </div>}
+                </div>
+                <div className="col-md-6 position-relative">
+                    <label htmlFor="Quantity" className="form-label">Quantity</label>
+                    <input type="number" className="form-control" 
+                    defaultValue="10"
+                    {...register('Quantity', { required: true })} />
+                    {errors.Quantity && <div className="text-danger">
                         This field is required
                     </div>}
                 </div>
@@ -69,12 +82,26 @@ export default function AddProduct() {
                     </div>}
                 </div>
                 <div className="col-md-10 position-relative">
-                    {/* <ReactEditorJS {...register('Description', { required: true })}
-                        tools={EDITOR_JS_TOOLS} className="form-control"
-                        defaultValue=""
-                    /> */}
-                    <ReactEditorJS tools={EDITOR_JS_TOOLS} defaultValue="" className="form-control" {...register('Description', { required: true })}/>
-                    {errors.Description && <div className="text-danger">
+                <CKEditor
+                    editor={ ClassicEditor } {...register('Description', { required: true })}
+                    data=""
+                    onChange={ ( event, editor ) => {
+                        const data = editor.getData();
+                        setValue("Description", data);
+                        if(data){
+                            clearErrors('Description');
+                        }else{
+                            setError('Description');
+                        }
+                    } }
+                    onBlur={ ( event, editor ) => {
+                        // console.log( 'Blur.', editor );
+                    } }
+                    onFocus={ ( event, editor ) => {
+                        // console.log( 'Focus.', editor );
+                    } }
+                />
+                {errors.Description && <div className="text-danger">
                         This field is required
                     </div>}
                 </div>
